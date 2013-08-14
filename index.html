@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+    <title>Bugzilla Bug 10' Status</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+      html, body {
+        overflow: hidden;
+        height: 100%;
+        font-size: 4vmax;
+        font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
+        background: url(https://bugzilla.mozilla.org/skins/contrib/Mozilla/noise.png), linear-gradient(rgb(215, 211, 200), rgb(246, 244, 236) 400px);
+      }
+      h1 {
+        font-size: 5vmax;
+      }
+      #id {
+        font-weight: 600;
+      }
+      #meta {
+        color: #666;
+        margin-top: 10vmin;
+      }
+      #status {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+      }
+      #primary.resolved {
+        color: #0a0;
+      }
+      #main {
+        font-size: 120%;
+      }
+      div {
+        margin: 2vmax;
+      }
+      #product {
+        background-size: auto 20vh;
+        background-position: center right;
+        background-repeat: no-repeat;
+        height: 20vh;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 80vh;
+      }
+      #product.Marketplace {
+        width: 100vh;
+        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox%20Marketplace/logo-wordmark/firefox-marketplace_logo-wordmark_RGB.png);
+      }
+      #product.Core {
+        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Mozilla/mozilla_wordmark.png);
+      }
+      #product.Boot2Gecko {
+        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox%20OS/logo-wordmark/firefox-os_logo-wordmark_RGB.png);
+      }
+      #product.Firefox {
+        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox/logo-wordmark/firefox_logo-wordmark-horiz_RGB.png);
+      }
+
+    </style>
+  </head>
+  <body>
+
+
+    <div id="main"><i id="id"></i> - <span id="desc"></span></div>
+    <div id="meta">
+      Filed <time id="filed"></time>,
+      Changed <time id="changed"></time>
+    </div>
+    <b id="product"></b>
+    <div id="about"></div>
+    <div id="status"><span id="primary"></span> <span id="res"></span></div>
+
+    <script src="bz.js"></script>
+    <script>
+
+      var $ = document.querySelector.bind(document);
+
+      var queryParams = (function() {
+        var qs = window.location.search.substr(1);
+        var ret = {};
+        var pairs = qs.split('&');
+
+        pairs.forEach(function(p) {
+          p = p.split('=');
+          ret[p[0]] = p[1];
+        });
+
+        return ret;
+
+      })();
+
+      var id = queryParams.id;
+      var bz = bugzilla.createClient();
+
+      var map = {
+        'summary': 'h1'
+      }
+
+      function timedelta(d1) {
+        d1 = new Date(d1);
+        var d = ~~((Date.now() - d1.getTime()) / 1000);
+        if (d < 60) return 'just now';
+        if (d < 120) return 'a minute ago';
+        if (d < 3600) return ~~(d/60) + ' minutes ago';
+        d = ~~(d/3600);
+        if (d < 2) return 'an hour ago';
+        if (d < 24) return d + ' hours ago';
+        d = ~~(d/24);
+        if (d < 2) return 'a day ago';
+        if (d < 30) return d + ' days ago';
+        if (d < 60) return 'a month ago';
+        if (d < 360) return ~~(d/30) + ' months ago';
+        if (d < 365*2) return 'a year ago';
+        return ~~(d / 365) + ' years ago';
+      }
+
+      function ageColor (d, max) {
+        var age = Date.now() - (new Date(d)).getTime();
+        var life = Math.max(max - (age / 1000 / 3600 / 24 / 30), 0) * 200 / max|0;
+        var c = 'rgb(' + [200 - life, life, 64].join(',') + ')';
+        return c;
+      }
+
+      bz.getBug(id, function(error, bug) {
+        if (error) return;
+        console.log(bug);
+        $('#id').innerHTML = '#' + bug.id;
+        $('#desc').innerHTML = bug.summary;
+        $('#filed').innerHTML = timedelta(bug.creation_time);
+        $('#filed').style.color = ageColor(bug.creation_time, 60);
+        $('#changed').innerHTML = timedelta(bug.last_change_time);
+        $('#changed').style.color = ageColor(bug.last_change_time, 6);
+
+
+        $('#primary').innerHTML = bug.status;
+        $('#primary').classList.add(bug.status.toLowerCase());
+        $('#product').classList.add(bug.product);
+        if (bug.status === 'RESOLVED') {
+          $('#res').innerHTML = bug.resolution;
+        }
+      });
+    </script>
+  </body>
+</html>
