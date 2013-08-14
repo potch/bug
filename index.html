@@ -52,17 +52,23 @@
         right: 0;
         width: 80vh;
       }
-      #product.Marketplace {
+      #product.support-mozilla-org {
+        margin: 2vmax;
+        background-size: auto 10vh;
+        height: 10vh;
+        background-image: url(https://support.cdn.mozilla.net/static/img/mozilla-support.png);
+      }
+      #product.marketplace {
         width: 100vh;
         background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox%20Marketplace/logo-wordmark/firefox-marketplace_logo-wordmark_RGB.png);
       }
-      #product.Core {
+      #product.core {
         background-image: url(https://assets.mozillalabs.com/Brands-Logos/Mozilla/mozilla_wordmark.png);
       }
-      #product.Boot2Gecko {
+      #product.boot2gecko {
         background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox%20OS/logo-wordmark/firefox-os_logo-wordmark_RGB.png);
       }
-      #product.Firefox {
+      #product.firefox {
         background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox/logo-wordmark/firefox_logo-wordmark-horiz_RGB.png);
       }
 
@@ -131,6 +137,10 @@
         return c;
       }
 
+      function slug(s) {
+        return s.toLowerCase().replace(/[\s._]+/g, '-');
+      }
+
       bz.getBug(id, function(error, bug) {
         if (error) return;
         console.log(bug);
@@ -144,7 +154,7 @@
 
         $('#primary').innerHTML = bug.status;
         $('#primary').classList.add(bug.status.toLowerCase());
-        $('#product').classList.add(bug.product);
+        $('#product').classList.add(slug(bug.product));
         if (bug.status === 'RESOLVED') {
           $('#res').innerHTML = bug.resolution;
         }
