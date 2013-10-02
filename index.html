@@ -157,22 +157,25 @@
         'summary': 'h1'
       }
 
-      function timedelta(d1) {
-        d1 = new Date(d1);
-        var d = ~~((Date.now() - d1.getTime()) / 1000);
-        if (d < 60) return 'just now';
-        if (d < 120) return 'a minute ago';
-        if (d < 3600) return ~~(d/60) + ' minutes ago';
-        d = ~~(d/3600);
-        if (d < 2) return 'an hour ago';
-        if (d < 24) return d + ' hours ago';
-        d = ~~(d/24);
-        if (d < 2) return 'a day ago';
-        if (d < 30) return d + ' days ago';
-        if (d < 60) return 'a month ago';
-        if (d < 360) return ~~(d/30) + ' months ago';
-        if (d < 365*2) return 'a year ago';
-        return ~~(d / 365) + ' years ago';
+      function timedelta(d) {
+        d = Date.parse(d);
+        if (!d) return 'unknown';
+        d = (Date.now() - d) / 1000 | 0;
+        var suffix = d < 0 ? ' from now' : ' ago';
+        d = Math.abs(d);
+        if (d < 60) return 'just now' + suffix;
+        if (d < 120) return 'a minute' + suffix;
+        if (d < 3600) return (d / 60 | 0) + ' minutes' + suffix;
+        d = d / 3600 | 0;
+        if (d < 2) return 'an hour' + suffix;
+        if (d < 24) return d + ' hours' + suffix;
+        d = d / 24 | 0;
+        if (d < 2) return 'a day' + suffix;
+        if (d < 30) return d + ' days' + suffix;
+        if (d < 60) return 'a month' + suffix;
+        if (d < 360) return (d / 30 | 0) + ' months' + suffix;
+        if (d < 365 * 2) return 'a year' + suffix;
+        return (d / 365 | 0) + ' years' + suffix;
       }
 
       function ageColor (d, max) {
