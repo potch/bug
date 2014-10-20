@@ -9,8 +9,8 @@
     this.username = options.username;
     this.password = options.password;
     this.apiUrl = options.url ||
-      (options.test ? "https://api-dev.bugzilla.mozilla.org/test/latest/"
-                    : "https://api-dev.bugzilla.mozilla.org/latest/");
+      (options.test ? "https://bugzilla.mozilla.org/bzapi/"
+                    : "https://bugzilla.mozilla.org/bzapi/");
   }
 
   BugzillaClient.prototype = {
