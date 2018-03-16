@@ -38,6 +38,8 @@
       }
       #main {
         font-size: 120%;
+        max-height: 5em;
+        overflow: hidden;
       }
       div {
         margin: 2vmax;
@@ -46,46 +48,47 @@
         display: none;
       }
       #product {
-        background-size: auto 10vmax;
+        background-size: contain;
         background-position: bottom right;
         background-repeat: no-repeat;
         height: 10vmax;
         position: absolute;
         bottom: 0;
         right: 0;
-        width: 40vmax;
-      }
-      #product.support-mozilla-org {
         margin: 2vmax;
-        background-size: auto 5vmax;
-        height: 5vmax;
-        background-image: url(https://support.cdn.mozilla.net/static/img/mozilla-support.png);
+        width: 30vmax;
+        overflow: hidden;
+        text-align: right;
       }
-      #product.marketplace {
-        width: 50vmax;
-        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox%20Marketplace/logo-wordmark/firefox-marketplace_logo-wordmark_RGB.png);
+      #product .name {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        font-weight: normal;
+        color: #444;
+        font-style: italic;
       }
       #product.core,
       #product.mozilla-org {
-        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Mozilla/mozilla_wordmark.png);
-      }
-      #product.boot2gecko {
-        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox%20OS/logo-wordmark/firefox-os_logo-wordmark_RGB.png);
+        background-image: url(img/wordmark.svg);
       }
       #product.firefox,
       #product.firefox-for-android {
-        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Firefox/logo-wordmark/firefox_logo-wordmark-horiz_RGB.png);
+        background-image: url(img/FirefoxRelease.png);
       }
       #product.mozilla-developer-network {
-        margin: 2vmax;
         background-image: url(https://developer.cdn.mozilla.net/media/img/mdn-logo.png);
       }
       #product.bugzilla-mozilla-org {
-        margin: 2vmax;
         background-image: url(http://www.bugzilla.org/img/buggie.png);
       }
-      #product.thunderbird {
-        background-image: url(https://assets.mozillalabs.com/Brands-Logos/Thunderbird/logo-wordmark/thunderbird_logo-wordmark_RGB.png);
+      #product.core span,
+      #product.mozilla-org span,
+      #product.firefox span,
+      #product.firefox-for-android span,
+      #product.mozilla-developer-network span,
+      #product.bugzilla-mozilla-org span {
+        display: none;
       }
       #oops {
         padding-top: 35vh;
@@ -111,6 +114,9 @@
       @keyframes spin {
         to { transform: rotate(-360deg); }
       }
+      #desc {
+        font-size: .8em;
+      }
     </style>
   </head>
   <body>
@@ -126,12 +132,11 @@
         Filed <time id="filed"></time>,
         Changed <time id="changed"></time>
       </div>
-      <b id="product"></b>
+      <b id="product"><span class="name"></span></b>
       <div id="about"></div>
       <div id="status"><span id="primary"></span> <span id="res"></span></div>
     </section>
 
-    <script src="bz.js"></script>
     <script>
 
       var $ = document.querySelector.bind(document);
@@ -151,7 +156,6 @@
       })();
 
       var id = queryParams.id;
-      var bz = bugzilla.createClient();
 
       var map = {
         'summary': 'h1'
@@ -189,14 +193,13 @@
         return s.toLowerCase().replace(/[\s._]+/g, '-');
       }
 
-      bz.getBug(id, function(error, bug) {
-        $('#throb').style.display = 'none';
-        if (error) {
-          $('#oops').style.display = 'block';
-          return;
-        }
-        $('#bug').style.display = 'block';
+      fetch(`https://bugzilla.mozilla.org/rest/bug/${id}`)
+      .then(r => r.json())
+      .then(results => {
+        let bug = results.bugs[0];
         console.log(bug);
+        $('#throb').style.display = 'none';
+        $('#bug').style.display = 'block';
         console.log(bug.product);
         $('#id').innerHTML = '#' + bug.id;
         $('#desc').innerHTML = bug.summary;
@@ -208,10 +211,16 @@
 
         $('#primary').innerHTML = bug.status;
         $('#primary').classList.add(bug.status.toLowerCase());
+        $('#product .name').innerText = bug.product;
         $('#product').classList.add(slug(bug.product));
         if (bug.status === 'RESOLVED' || bug.status === 'VERIFIED') {
           $('#res').innerHTML = bug.resolution;
         }
+      })
+      .catch(e => {
+        console.error(e);
+        $('#throb').style.display = 'none';
+        $('#oops').style.display = 'block';
       });
     </script>
   </body>
